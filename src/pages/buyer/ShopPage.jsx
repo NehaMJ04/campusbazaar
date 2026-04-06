@@ -70,12 +70,12 @@ function ShopPage() {
               <span>🗓 Member since {new Date(shop.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long" })}</span>
               <span>📦 {products.length} Products</span>
             </div>
-            <button
+            {/* <button
               className="contact-seller-btn"
               onClick={() => navigate(`/buyer/chat/${shop.seller_id}`)}
             >
              Contact Seller
-            </button>
+            </button> */}
           </div>
         </div>
 
