@@ -82,7 +82,7 @@ function SellerApprovals() {
 
       const userUuid = userData.id;
 
-      // 2. Update seller_request status to approved
+      //  Update seller_request status to approved
       const { error: reqErr } = await supabase
         .from("seller_requests")
         .update({ status: "approved" })
@@ -98,15 +98,15 @@ function SellerApprovals() {
 
       if (userUpdateErr) throw userUpdateErr;
 
-      // 4. Create the shop record — DO NOT touch products here at all.
-      //    Products are added by the seller themselves after approval.
+      //  Create the shop record
+      //    Products are added by the seller  after approval.
       const { error: shopErr } = await supabase
         .from("shops")
         .insert([{
           seller_id: userUuid,
           name: seller.shop_name,
           description: seller.shop_description,
-          Category: seller.category,   // matches your schema column name
+          Category: seller.category, 
         }]);
 
       if (shopErr) throw shopErr;
@@ -121,24 +121,20 @@ function SellerApprovals() {
     }
   };
 
-  const handleReject = async (requestId, college_id) => {
-    if (!window.confirm("Reject this seller?")) return;
+    const handleReject = async (requestId) => {
+    if (!window.confirm("Reject this specific shop request?")) return;
 
-    const { error: r } = await supabase
+    // ONLY update the request table
+    const { error } = await supabase
       .from("seller_requests")
       .update({ status: "rejected" })
       .eq("id", requestId);
 
-    const { error: u } = await supabase
-      .from("users")
-      .update({ seller_status: "rejected" })
-      .eq("college_id", college_id);
-
-    if (r || u) {
-      showMessage("Error rejecting seller", "error");
+    if (error) {
+      showMessage("Error rejecting request", "error");
     } else {
       setSellers(prev => prev.filter(s => s.id !== requestId));
-      showMessage("Seller rejected successfully", "success");
+      showMessage("Shop request rejected. Seller's existing access is unchanged.", "success");
       fetchStats();
     }
   };
