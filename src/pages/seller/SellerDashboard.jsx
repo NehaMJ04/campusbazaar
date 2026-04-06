@@ -270,7 +270,7 @@ export default function SellerDashboardHome() {
             <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", marginTop: "2px" }}>{shop.description}</div>
           </div>
           <button
-            onClick={() => navigate("/seller/settings")}
+            onClick={() => navigate(`/seller/shops?edit=${shop.id}`)}
             style={{
               marginLeft: "auto", padding: "8px 16px",
               background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)",

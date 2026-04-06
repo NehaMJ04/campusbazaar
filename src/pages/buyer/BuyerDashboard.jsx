@@ -382,7 +382,7 @@ async function fetchOrders() {
   </button>
   
   <button className="sidebar-btn"
-    onClick={() => navigate("/buyer/products")}>
+    onClick={() => navigate("/")}>
     Browse Products
   </button>
   <button className="sidebar-btn"

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import TopsellerCard from '../components/TopsellerCard'; // ✅ ADD THIS
+import TopsellerCard from '../components/TopsellerCard'; 
 import { supabase } from "../supabaseClient";
 import './Home.css';
 
@@ -48,7 +48,7 @@ function Home() {
 
       {/* TOP SHOPS */}
       <section className="home-section top-sellers-section">
-        <h2 className="side-title">TOP <br /> SELLERS</h2>
+        <h2 className="side-title">FROM YOUR <br /> CAMPUS</h2>
         <div className="card-row-wrapper">
           <div className="card-row">
             {shops.map(shop => (

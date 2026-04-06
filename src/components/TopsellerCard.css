@@ -1,8 +1,8 @@
 .top-seller-card {
   width: 180px;
-  height: 220px;        /* fixed total height */
+  height: 220px;        
   border-radius: 12px;
-  overflow: hidden;     /* this clips everything inside */
+  overflow: hidden;     
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
@@ -12,16 +12,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;  /* changed from center */
+  justify-content: flex-start;  
 }
 
 .top-seller-image {
-  width: 180px;         /* exact card width */
-  height: 150px;        /* fixed image area */
-  object-fit: cover;    /* changed from contain — fills the box */
+  width: 180px;         
+  height: 150px;        
+  object-fit: cover;    
   object-position: center;
   display: block;
-  flex-shrink: 0;       /* don't let it shrink */
+  flex-shrink: 0;     
 }
 .top-seller-card:hover {
   transform: translateY(-4px);
