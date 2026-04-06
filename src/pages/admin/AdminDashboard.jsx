@@ -7,7 +7,6 @@ import {
 } from "recharts";
 import './AdminDashboard.css';
 
-// ── Recharts color palette matching the app's brown theme ──
 const COLORS = {
   buyers:   "#8b6a6a",
   sellers:  "#6b4e4e",
@@ -22,6 +21,7 @@ function AdminDashboard() {
     buyers: 0,
     sellers: 0,
     pending: 0,
+    totalOrders: 0, // New state for dynamic orders
   });
 
   const [approvalStats, setApprovalStats] = useState({
@@ -34,16 +34,23 @@ function AdminDashboard() {
 
   useEffect(() => {
     const fetchAll = async () => {
+      // 1. Fetch Users
       const { data: users, error: userError } = await supabase
         .from("users")
         .select("role, seller_status");
 
+      // 2. Fetch Seller Requests
       const { data: requests, error: requestError } = await supabase
         .from("seller_requests")
         .select("status");
 
-      if (userError || requestError) {
-        console.error(userError || requestError);
+      // 3. Fetch Total Orders Dynamically
+      const { count: orderCount, error: orderError } = await supabase
+        .from("orders")
+        .select('*', { count: 'exact', head: true });
+
+      if (userError || requestError || orderError) {
+        console.error(userError || requestError || orderError);
         setLoading(false);
         return;
       }
@@ -57,6 +64,7 @@ function AdminDashboard() {
         buyers:     users.filter(u => u.role === "buyer").length,
         sellers:    users.filter(u => u.role === "seller" && u.seller_status === "approved").length,
         pending,
+        totalOrders: orderCount || 0, // Set the dynamic count
       });
 
       setApprovalStats({ pending, approved, rejected });
@@ -66,7 +74,6 @@ function AdminDashboard() {
     fetchAll();
   }, []);
 
-  // ── Data shapes for Recharts ──
   const userBarData = [
     { name: "Buyers",  value: stats.buyers  },
     { name: "Sellers", value: stats.sellers },
@@ -76,7 +83,7 @@ function AdminDashboard() {
     { name: "Pending",  value: approvalStats.pending,  color: COLORS.pending  },
     { name: "Approved", value: approvalStats.approved, color: COLORS.approved },
     { name: "Rejected", value: approvalStats.rejected, color: COLORS.rejected },
-  ].filter(d => d.value > 0); // hide 0-value slices
+  ].filter(d => d.value > 0);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -94,7 +101,6 @@ function AdminDashboard() {
     <AdminLayout pageTitle="Dashboard">
       <h1>Overview</h1>
 
-      {/* ── Top stat cards ── */}
       <div className="stats-grid">
         <div className="stats-card">
           <h3>Total Users</h3>
@@ -114,15 +120,13 @@ function AdminDashboard() {
         </div>
         <div className="stats-card">
           <h3>Total Orders</h3>
-          <p className="stat-muted">Soon</p>
+          {/* Now displaying dynamic data */}
+          <p>{stats.totalOrders}</p> 
         </div>
       </div>
 
-      {/* ── Charts row ── */}
       {!loading && (
         <div className="charts-row">
-
-          {/* Bar chart — buyers vs sellers */}
           <div className="chart-card">
             <p className="chart-title">User breakdown</p>
             <ResponsiveContainer width="100%" height={220}>
@@ -156,7 +160,6 @@ function AdminDashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Pie chart — approval status */}
           <div className="chart-card">
             <p className="chart-title">Seller request status</p>
             {approvalPieData.length === 0 ? (
@@ -189,7 +192,6 @@ function AdminDashboard() {
               </ResponsiveContainer>
             )}
           </div>
-
         </div>
       )}
     </AdminLayout>

@@ -7,6 +7,8 @@ nav {
   box-sizing: border-box;
   width: 100%;
   background-color: #fff;
+  /* Ensure the nav doesn't clip the dropdown */
+  overflow: visible; 
 }
 
 .nav-left h2 {
@@ -40,7 +42,6 @@ nav {
   font-size: 15px;
 }
 
-/* Override nav input — only target the search input */
 .search-container input {
   border: none;
   outline: none;
@@ -61,6 +62,7 @@ nav {
   display: flex;
   align-items: center;
   gap: 16px;
+  overflow: visible;
 }
 
 .nav-actions a {
@@ -73,7 +75,8 @@ nav {
   color: #6b4e4e;
 }
 
-.nav-actions button {
+/* FIX: Targeted selector for the 'Become a Seller' button ONLY */
+.nav-actions > a > button {
   padding: 8px 20px;
   border-radius: 20px;
   border: none;
@@ -83,9 +86,10 @@ nav {
   font-size: 14px;
 }
 
-.nav-actions button:hover {
+.nav-actions > a > button:hover {
   background-color: #4e1c1c;
 }
+
 .nav-avatar {
   width: 36px;
   height: 36px;
@@ -104,3 +108,110 @@ nav {
 .nav-avatar:hover {
   opacity: 0.85;
 }
+
+.nav-avatar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Updated Dropdown - Clean Row Style */
+.nav-dropdown {
+  position: absolute !important;
+  top: calc(100% + 12px) !important;
+  right: 0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
+  min-width: 220px !important;
+  z-index: 9999 !important;
+  padding: 4px 0 !important;
+  margin: 0 !important;
+  animation: dropdownFadeIn 0.12s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-dropdown-header {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 4px;
+}
+
+.nav-dropdown-email {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.nav-dropdown-divider {
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  margin: 4px 0;
+}
+
+/* FIX: Specificity override for menu items */
+.nav-dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 10px 16px !important;
+  
+  /* Resetting the brown pill styles */
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: #2c1810 !important;
+  
+  text-align: left !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  transition: background 0.15s;
+}
+
+.nav-dropdown-item:hover {
+  background: #f5f5f5 !important;
+}
+
+.nav-dropdown-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-dropdown-logout {
+  color: #c0392b !important;
+  border-top: 1px solid #f0f0f0 !important;
+  margin-top: 4px !important;
+  padding-top: 12px !important;
+}
+
+.nav-dropdown-logout:hover {
+  background: #fff5f4 !important;
+}
+
+/* Role Badges */
+.role-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  width: fit-content;
+  letter-spacing: 0.3px;
+}
+
+.role-buyer  { background: #e8f0fe; color: #1a73e8; }
+.role-seller { background: #e6f4ea; color: #1e7e34; }
+.role-admin  { background: #fef7e0; color: #b06000; }

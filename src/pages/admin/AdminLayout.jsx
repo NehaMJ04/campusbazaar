@@ -78,17 +78,12 @@ export function AdminLayout({ children, pageTitle = "Admin Panel" }) {
           {/* Divider before external link */}
           <div className="nav-divider" />
 
-          {/*
-            UPDATE THIS: change "/shop" to whatever your actual shop route is.
-            e.g. "/home", "/marketplace", "/browse" etc.
-            The admin is already logged in so they'll see the shop as a normal user.
-          */}
           <NavLink
-            to="/shop"
+            to="/"
             className="nav-item nav-item-external"
           >
             <span className="nav-dot" />
-            View Shop ↗
+            Browse Marketplace ↗
           </NavLink>
         </div>
       </div>

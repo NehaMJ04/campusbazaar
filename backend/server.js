@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -80,6 +81,62 @@ app.post("/create-order", async (req, res) => {
 app.post("/payment-webhook", (req, res) => {
   console.log("🔔 Webhook received:", req.body);
   res.json({ status: "ok" });
+});
+
+app.post("/send-invoice-email", async (req, res) => {
+  try {
+    const { email, order, items } = req.body;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const itemRows = items.map(item => `
+      <tr>
+        <td>${item.products?.name}</td>
+        <td>${item.quantity}</td>
+        <td>₹${item.price_at_purchase}</td>
+      </tr>
+    `).join("");
+
+    const html = `
+      <h2>🎉 Order Confirmed - CampusBazaar</h2>
+      <p>Hi ${order.buyer_name},</p>
+      <p>Your order <b>#${order.cashfree_order_id}</b> has been successfully placed.</p>
+
+      <h3>Order Details:</h3>
+      <table border="1" cellpadding="8" cellspacing="0">
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Price</th>
+        </tr>
+        ${itemRows}
+      </table>
+
+      <h3>Total Paid: ₹${order.total_amount}</h3>
+      <p>Delivery Address: ${order.delivery_address}</p>
+
+      <p>Thank you for shopping with CampusBazaar! 🛍️</p>
+    `;
+
+    await transporter.sendMail({
+      from: `"CampusBazaar" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your Order is Confirmed 🎉",
+      html,
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("❌ Email Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(PORT, () => {

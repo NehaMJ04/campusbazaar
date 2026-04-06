@@ -1,449 +1,3 @@
-// import { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { supabase } from "../../supabaseClient";
-
-// const CATEGORIES = [
-//   "Electronics", "Clothing & Fashion", "Books & Stationery",
-//   "Food & Beverages", "Accessories", "Sports & Fitness",
-//   "Art & Craft", "Health & Beauty", "Services", "Other",
-// ];
-
-// const inputStyle = {
-//   padding: "10px 13px", borderRadius: "8px",
-//   border: "1.5px solid #EDE8E3", fontSize: "14px",
-//   color: "#2C1810", background: "#fff", outline: "none",
-//   fontFamily: "inherit", width: "100%", boxSizing: "border-box",
-//   transition: "border-color 0.15s",
-// };
-// const focus   = e => (e.target.style.borderColor = "#C0392B");
-// const unfocus = e => (e.target.style.borderColor = "#EDE8E3");
-
-// /* ── ShopCard ──────────────────────────────────────────────────────────── */
-// function ShopCard({ shop, productCount, onEdit, onViewProducts }) {
-//   return (
-//     <div style={{
-//       background: "#fff", borderRadius: "14px",
-//       border: "1px solid #EDE8E3", overflow: "hidden",
-//       display: "flex", flexDirection: "column",
-//       transition: "box-shadow 0.15s",
-//     }}
-//       onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)")}
-//       onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
-//     >
-//       {/* logo strip */}
-//       <div style={{
-//         height: "90px", background: "#F7F4F0",
-//         display: "flex", alignItems: "center", justifyContent: "center",
-//         overflow: "hidden", position: "relative",
-//       }}>
-//         {shop.shop_urls ? (
-//           <img
-//             src={shop.shop_urls} alt={shop.name}
-//             style={{ width: "100%", height: "100%", objectFit: "cover" }}
-//             onError={e => { e.target.style.display = "none"; }}
-//           />
-//         ) : (
-//           <div style={{
-//             width: "56px", height: "56px", borderRadius: "14px",
-//             background: "#3D2B2B", display: "flex",
-//             alignItems: "center", justifyContent: "center",
-//             fontSize: "22px", fontWeight: 700, color: "#fff",
-//           }}>
-//             {shop.name?.charAt(0).toUpperCase()}
-//           </div>
-//         )}
-//         {shop.Category && (
-//           <span style={{
-//             position: "absolute", top: "8px", right: "8px",
-//             background: "rgba(61,43,43,0.82)", color: "#fff",
-//             fontSize: "11px", fontWeight: 600,
-//             padding: "3px 9px", borderRadius: "20px",
-//           }}>{shop.Category}</span>
-//         )}
-//       </div>
-
-//       {/* body */}
-//       <div style={{ padding: "16px 16px 12px", flex: 1 }}>
-//         <div style={{ fontWeight: 700, fontSize: "15px", color: "#2C1810", marginBottom: "4px" }}>
-//           {shop.name}
-//         </div>
-//         <div style={{
-//           fontSize: "12.5px", color: "#888", lineHeight: 1.5,
-//           display: "-webkit-box", WebkitLineClamp: 2,
-//           WebkitBoxOrient: "vertical", overflow: "hidden",
-//           marginBottom: "10px",
-//         }}>
-//           {shop.description || "No description"}
-//         </div>
-
-//         <div style={{
-//           display: "inline-flex", alignItems: "center", gap: "5px",
-//           background: "#F7F4F0", borderRadius: "6px",
-//           padding: "4px 10px", fontSize: "12px", color: "#5C3D3D", fontWeight: 600,
-//         }}>
-//           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-//             <path strokeLinecap="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-//           </svg>
-//           {productCount} product{productCount !== 1 ? "s" : ""}
-//         </div>
-//       </div>
-
-//       {/* footer actions */}
-//       <div style={{
-//         padding: "10px 12px", borderTop: "1px solid #F5F0EC",
-//         display: "flex", gap: "8px",
-//       }}>
-//         <button
-//           onClick={() => onViewProducts(shop.id)}
-//           style={{
-//             flex: 1, padding: "8px", borderRadius: "7px",
-//             background: "#3D2B2B", color: "#fff",
-//             border: "none", fontSize: "12.5px", fontWeight: 600, cursor: "pointer",
-//           }}
-//         >
-//           View Products
-//         </button>
-//         <button
-//           onClick={() => onEdit(shop)}
-//           style={{
-//             flex: 1, padding: "8px", borderRadius: "7px",
-//             background: "none", color: "#3D2B2B",
-//             border: "1.5px solid #EDE8E3",
-//             fontSize: "12.5px", fontWeight: 600, cursor: "pointer",
-//           }}
-//         >
-//           Edit Shop
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// /* ── ShopModal — create / edit ─────────────────────────────────────────── */
-// function ShopModal({ shop, userId, onClose, onSaved }) {
-//   const isEdit = !!shop;
-//   const [form, setForm] = useState({
-//     name:        shop?.name        || "",
-//     description: shop?.description || "",
-//     Category:    shop?.Category    || "",
-//     shop_urls:   shop?.shop_urls   || "",
-//   });
-//   const [logoFile,  setLogoFile]  = useState(null);
-//   const [logoPreview, setLogoPreview] = useState(shop?.shop_urls || null);
-//   const [saving,    setSaving]    = useState(false);
-//   const [message,   setMessage]   = useState(null);
-
-//   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-
-//   const handleLogo = e => {
-//     const file = e.target.files[0];
-//     if (!file) return;
-//     setLogoFile(file);
-//     setLogoPreview(URL.createObjectURL(file));
-//   };
-
-//   const uploadLogo = async (shopId) => {
-//     if (!logoFile) return form.shop_urls;
-//     const fileName = `logo-${shopId}-${Date.now()}`;
-//     const { error } = await supabase.storage
-//       .from("shop-logos")
-//       .upload(fileName, logoFile, { upsert: true });
-//     if (error) throw error;
-//     const { data } = supabase.storage.from("shop-logos").getPublicUrl(fileName);
-//     return data.publicUrl;
-//   };
-
-//   const handleSubmit = async e => {
-//     e.preventDefault();
-//     setSaving(true);
-//     setMessage(null);
-//     try {
-//       let finalUrl = form.shop_urls;
-
-//       if (isEdit) {
-//         finalUrl = await uploadLogo(shop.id);
-//         const { error } = await supabase
-//           .from("shops")
-//           .update({ ...form, shop_urls: finalUrl })
-//           .eq("id", shop.id);
-//         if (error) throw error;
-//       } else {
-//         /* create — insert first to get the new id, then upload logo */
-//         const { data: newShop, error } = await supabase
-//           .from("shops")
-//           .insert({ ...form, seller_id: userId })
-//           .select()
-//           .single();
-//         if (error) throw error;
-//         finalUrl = await uploadLogo(newShop.id);
-//         if (finalUrl !== form.shop_urls) {
-//           await supabase.from("shops").update({ shop_urls: finalUrl }).eq("id", newShop.id);
-//         }
-//       }
-
-//       setMessage({ type: "success", text: isEdit ? "Shop updated!" : "Shop created!" });
-//       setTimeout(() => { onSaved(); onClose(); }, 900);
-//     } catch (err) {
-//       setMessage({ type: "error", text: err.message });
-//     } finally {
-//       setSaving(false);
-//     }
-//   };
-
-//   return (
-//     /* backdrop */
-//     <div style={{
-//       position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)",
-//       zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center",
-//       padding: "20px",
-//     }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-
-//       <div style={{
-//         background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "480px",
-//         maxHeight: "90vh", overflowY: "auto",
-//         boxShadow: "0 12px 48px rgba(0,0,0,0.18)",
-//       }}>
-//         {/* header */}
-//         <div style={{
-//           padding: "20px 24px 16px",
-//           borderBottom: "1px solid #EDE8E3",
-//           display: "flex", justifyContent: "space-between", alignItems: "center",
-//           position: "sticky", top: 0, background: "#fff", zIndex: 1,
-//         }}>
-//           <span style={{ fontWeight: 700, fontSize: "16px", color: "#2C1810" }}>
-//             {isEdit ? "Edit Shop" : "Create New Shop"}
-//           </span>
-//           <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#aaa", lineHeight: 1 }}>×</button>
-//         </div>
-
-//         <form onSubmit={handleSubmit} style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
-
-//           {/* logo */}
-//           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-//             <div style={{
-//               width: "72px", height: "72px", borderRadius: "12px", flexShrink: 0,
-//               background: "#F7F4F0", border: "2px dashed #C0392B",
-//               overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-//             }}>
-//               {logoPreview
-//                 ? <img src={logoPreview} alt="logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-//                 : <span style={{ fontSize: "24px" }}>🏪</span>}
-//             </div>
-//             <div style={{ flex: 1 }}>
-//               <label style={{
-//                 display: "inline-block", padding: "8px 14px",
-//                 background: "#3D2B2B", color: "#fff", borderRadius: "7px",
-//                 fontSize: "12.5px", fontWeight: 600, cursor: "pointer",
-//               }}>
-//                 {logoFile ? "Change Logo" : "Upload Logo"}
-//                 <input type="file" accept="image/*" onChange={handleLogo} style={{ display: "none" }} />
-//               </label>
-//               {logoFile && <div style={{ fontSize: "11px", color: "#22764A", marginTop: "4px" }}>✓ {logoFile.name}</div>}
-//               <input
-//                 style={{ ...inputStyle, marginTop: "8px", fontSize: "12px", padding: "7px 10px" }}
-//                 name="shop_urls" value={form.shop_urls}
-//                 onChange={handleChange} placeholder="Or paste logo URL"
-//                 onFocus={focus} onBlur={unfocus}
-//               />
-//             </div>
-//           </div>
-
-//           {/* name */}
-//           <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-//             <label style={{ fontSize: "13px", fontWeight: 600, color: "#3D2B2B" }}>Shop Name <span style={{ color: "#C0392B" }}>*</span></label>
-//             <input style={inputStyle} name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Neha's Stationery" onFocus={focus} onBlur={unfocus} />
-//           </div>
-
-//           {/* description */}
-//           <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-//             <label style={{ fontSize: "13px", fontWeight: 600, color: "#3D2B2B" }}>Description</label>
-//             <textarea style={{ ...inputStyle, minHeight: "75px", resize: "vertical", lineHeight: 1.6 }} name="description" value={form.description} onChange={handleChange} placeholder="What do you sell?" onFocus={focus} onBlur={unfocus} />
-//           </div>
-
-//           {/* category */}
-//           <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-//             <label style={{ fontSize: "13px", fontWeight: 600, color: "#3D2B2B" }}>Category</label>
-//             <select style={inputStyle} name="Category" value={form.Category} onChange={handleChange} onFocus={focus} onBlur={unfocus}>
-//               <option value="">Select a category…</option>
-//               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-//             </select>
-//           </div>
-
-//           {/* feedback */}
-//           {message && (
-//             <div style={{
-//               padding: "10px 14px", borderRadius: "8px", fontSize: "13px", fontWeight: 500,
-//               background: message.type === "success" ? "#EDFBF3" : "#FEF0EE",
-//               color:      message.type === "success" ? "#22764A"  : "#C0392B",
-//             }}>
-//               {message.type === "success" ? "✓ " : "⚠ "}{message.text}
-//             </div>
-//           )}
-
-//           {/* actions */}
-//           <div style={{ display: "flex", gap: "10px", paddingTop: "4px" }}>
-//             <button type="button" onClick={onClose} style={{
-//               flex: 1, padding: "11px", background: "none",
-//               border: "1.5px solid #EDE8E3", borderRadius: "9px",
-//               color: "#3D2B2B", fontWeight: 700, fontSize: "14px", cursor: "pointer",
-//             }}>
-//               Cancel
-//             </button>
-//             <button type="submit" disabled={saving} style={{
-//               flex: 2, padding: "11px",
-//               background: saving ? "#aaa" : "#C0392B",
-//               color: "#fff", border: "none", borderRadius: "9px",
-//               fontWeight: 700, fontSize: "14px",
-//               cursor: saving ? "not-allowed" : "pointer",
-//             }}>
-//               {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Shop"}
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
-
-// /* ── MyShops page ──────────────────────────────────────────────────────── */
-// export default function MyShops() {
-//   const navigate = useNavigate();
-//   const [shops,        setShops]        = useState([]);
-//   const [productCounts,setProductCounts]= useState({});
-//   const [loading,      setLoading]      = useState(true);
-//   const [userId,       setUserId]       = useState(null);
-//   const [modalShop,    setModalShop]    = useState(undefined); // undefined=closed, null=create, obj=edit
-
-//   useEffect(() => { fetchAll(); }, []);
-
-//   async function fetchAll() {
-//     const { data: { user } } = await supabase.auth.getUser();
-//     if (!user) return;
-//     setUserId(user.id);
-
-//     const { data: shopData } = await supabase
-//       .from("shops")
-//       .select("*")
-//       .eq("seller_id", user.id)
-//       .order("created_at", { ascending: false });
-
-//     const list = shopData || [];
-//     setShops(list);
-
-//     /* count products per shop */
-//     if (list.length > 0) {
-//       const ids = list.map(s => s.id);
-//       const { data: prods } = await supabase
-//         .from("products")
-//         .select("shop_id")
-//         .in("shop_id", ids);
-//       const counts = {};
-//       (prods || []).forEach(p => {
-//         counts[p.shop_id] = (counts[p.shop_id] || 0) + 1;
-//       });
-//       setProductCounts(counts);
-//     }
-
-//     setLoading(false);
-//   }
-
-//   if (loading) return (
-//     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "300px" }}>
-//       <span style={{ color: "#888", fontSize: "14px" }}>Loading shops…</span>
-//     </div>
-//   );
-
-//   return (
-//     <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-
-//       {/* toolbar */}
-//       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-//         <div style={{ fontSize: "13px", color: "#888" }}>
-//           {shops.length} shop{shops.length !== 1 ? "s" : ""}
-//         </div>
-//         <button
-//           onClick={() => setModalShop(null)}
-//           style={{
-//             display: "flex", alignItems: "center", gap: "6px",
-//             padding: "10px 18px", borderRadius: "8px",
-//             background: "#C0392B", color: "#fff",
-//             border: "none", fontWeight: 700, fontSize: "13.5px", cursor: "pointer",
-//           }}
-//         >
-//           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-//             <path strokeLinecap="round" d="M12 4v16m8-8H4" />
-//           </svg>
-//           New Shop
-//         </button>
-//       </div>
-
-//       {/* empty state */}
-//       {shops.length === 0 ? (
-//         <div style={{
-//           background: "#fff", borderRadius: "14px", border: "1px solid #EDE8E3",
-//           padding: "60px", textAlign: "center",
-//         }}>
-//           <div style={{ fontSize: "44px", marginBottom: "14px" }}>🏪</div>
-//           <div style={{ fontWeight: 700, fontSize: "16px", color: "#2C1810", marginBottom: "6px" }}>No shops yet</div>
-//           <div style={{ color: "#888", fontSize: "13.5px", marginBottom: "20px" }}>
-//             Create your first shop to start listing products.
-//           </div>
-//           <button onClick={() => setModalShop(null)} style={{
-//             padding: "11px 24px", background: "#3D2B2B", color: "#fff",
-//             border: "none", borderRadius: "9px", fontWeight: 700,
-//             fontSize: "14px", cursor: "pointer",
-//           }}>
-//             Create First Shop
-//           </button>
-//         </div>
-//       ) : (
-//         <div style={{
-//           display: "grid",
-//           gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-//           gap: "18px",
-//         }}>
-//           {shops.map(shop => (
-//             <ShopCard
-//               key={shop.id}
-//               shop={shop}
-//               productCount={productCounts[shop.id] || 0}
-//               onEdit={s => setModalShop(s)}
-//               onViewProducts={shopId => navigate(`/seller/products?shop=${shopId}`)}
-//             />
-//           ))}
-
-//           {/* "Add another shop" card */}
-//           <div
-//             onClick={() => setModalShop(null)}
-//             style={{
-//               background: "#fff", borderRadius: "14px",
-//               border: "2px dashed #EDE8E3", minHeight: "200px",
-//               display: "flex", flexDirection: "column",
-//               alignItems: "center", justifyContent: "center",
-//               gap: "10px", cursor: "pointer", color: "#aaa",
-//               transition: "border-color 0.15s, color 0.15s",
-//             }}
-//             onMouseEnter={e => { e.currentTarget.style.borderColor="#C0392B"; e.currentTarget.style.color="#C0392B"; }}
-//             onMouseLeave={e => { e.currentTarget.style.borderColor="#EDE8E3"; e.currentTarget.style.color="#aaa"; }}
-//           >
-//             <div style={{ fontSize: "30px" }}>＋</div>
-//             <div style={{ fontSize: "13.5px", fontWeight: 600 }}>Add another shop</div>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* modal */}
-//       {modalShop !== undefined && (
-//         <ShopModal
-//           shop={modalShop}
-//           userId={userId}
-//           onClose={() => setModalShop(undefined)}
-//           onSaved={fetchAll}
-//         />
-//       )}
-//     </div>
-//   );
-// }
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
@@ -543,9 +97,8 @@ function ShopCard({ shop, productCount, onEdit, onViewProducts }) {
   );
 }
 
-/* ── ShopModal ──────────────────────────────────────────────────────────── */
+/* ── ShopModal (edit/delete only) ───────────────────────────────────────── */
 function ShopModal({ shop, userId, onClose, onSaved }) {
-  const isEdit = !!shop;
   const [form, setForm] = useState({
     name:        shop?.name        ?? "",
     description: shop?.description ?? "",
@@ -573,26 +126,38 @@ function ShopModal({ shop, userId, onClose, onSaved }) {
     return supabase.storage.from("shop-logos").getPublicUrl(name).data.publicUrl;
   };
 
+  const handleDeleteShop = async (shopId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this shop?\nAll products will be permanently deleted."
+    );
+    if (!confirmDelete) return;
+    try {
+      setSaving(true);
+      const { error: productError } = await supabase.from("products").delete().eq("shop_id", shopId);
+      if (productError) throw productError;
+      const { error: shopError } = await supabase.from("shops").delete().eq("id", shopId);
+      if (shopError) throw shopError;
+      alert("Shop deleted successfully");
+      onSaved();
+      onClose();
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete shop");
+      setSaving(false);
+    }
+  };
+
   const submit = async e => {
     e.preventDefault();
     if (!form.name.trim()) { setMsg({ type: "error", text: "Shop name is required." }); return; }
     setSaving(true); setMsg(null);
     try {
-      if (isEdit) {
-        const url = await uploadLogo(shop.id);
-        const { error } = await supabase.from("shops")
-          .update({ name: form.name, description: form.description, Category: form.Category, shop_urls: url })
-          .eq("id", shop.id);
-        if (error) throw error;
-      } else {
-        const { data: created, error } = await supabase.from("shops")
-          .insert({ name: form.name, description: form.description, Category: form.Category, seller_id: userId })
-          .select().single();
-        if (error) throw error;
-        const url = await uploadLogo(created.id);
-        if (url) await supabase.from("shops").update({ shop_urls: url }).eq("id", created.id);
-      }
-      setMsg({ type: "success", text: isEdit ? "Shop updated!" : "Shop created!" });
+      const url = await uploadLogo(shop.id);
+      const { error } = await supabase.from("shops")
+        .update({ name: form.name, description: form.description, Category: form.Category, shop_urls: url })
+        .eq("id", shop.id);
+      if (error) throw error;
+      setMsg({ type: "success", text: "Shop updated!" });
       setTimeout(() => { onSaved(); onClose(); }, 800);
     } catch (err) {
       setMsg({ type: "error", text: err.message || "Something went wrong." });
@@ -618,14 +183,11 @@ function ShopModal({ shop, userId, onClose, onSaved }) {
           display: "flex", justifyContent: "space-between", alignItems: "center",
           position: "sticky", top: 0, background: "#fff", zIndex: 1,
         }}>
-          <span style={{ fontWeight: 700, fontSize: 16, color: "#2C1810" }}>
-            {isEdit ? "Edit Shop" : "Create New Shop"}
-          </span>
+          <span style={{ fontWeight: 700, fontSize: 16, color: "#2C1810" }}>Edit Shop</span>
           <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#aaa", lineHeight: 1 }}>×</button>
         </div>
 
         <form onSubmit={submit} style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* logo */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{
               width: 70, height: 70, borderRadius: 12, flexShrink: 0,
@@ -684,23 +246,197 @@ function ShopModal({ shop, userId, onClose, onSaved }) {
             </div>
           )}
 
-          <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
-            <button type="button" onClick={onClose} style={{
-              flex: 1, padding: 11, background: "none",
-              border: "1.5px solid #EDE8E3", borderRadius: 9,
-              color: "#3D2B2B", fontWeight: 700, fontSize: 14, cursor: "pointer",
-            }}>Cancel</button>
-            <button type="submit" disabled={saving} style={{
-              flex: 2, padding: 11,
-              background: saving ? "#bbb" : "#C0392B",
-              color: "#fff", border: "none", borderRadius: 9,
-              fontWeight: 700, fontSize: 14,
-              cursor: saving ? "not-allowed" : "pointer",
-            }}>
-              {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Shop"}
+          <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 4 }}>
+            <button
+              type="button"
+              onClick={() => handleDeleteShop(shop.id)}
+              style={{
+                padding: "11px 16px", background: "#fff",
+                border: "1.5px solid #E53935", borderRadius: 9,
+                color: "#E53935", fontWeight: 700, fontSize: 14, cursor: "pointer",
+              }}
+            >
+              Delete Shop
             </button>
+            <div style={{ display: "flex", gap: 10, flex: 1, justifyContent: "flex-end" }}>
+              <button type="button" onClick={onClose} style={{
+                padding: 11, background: "none", border: "1.5px solid #EDE8E3",
+                borderRadius: 9, color: "#3D2B2B", fontWeight: 700, fontSize: 14, cursor: "pointer",
+              }}>Cancel</button>
+              <button type="submit" disabled={saving} style={{
+                padding: 11, background: saving ? "#bbb" : "#C0392B",
+                color: "#fff", border: "none", borderRadius: 9,
+                fontWeight: 700, fontSize: 14, cursor: saving ? "not-allowed" : "pointer",
+              }}>
+                {saving ? "Saving…" : "Save Changes"}
+              </button>
+            </div>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+/* ── ApplyShopModal ─────────────────────────────────────────────────────── */
+function ApplyShopModal({ userId, onClose }) {
+  const [form, setForm] = useState({ shop_name: "", shop_description: "", category: "" });
+  const [saving, setSaving]             = useState(false);
+  const [msg, setMsg]                   = useState(null);
+  const [collegeId, setCollegeId]       = useState(null);
+  const [hasPending, setHasPending]     = useState(false); // only block on pending
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      // Fetch college_id from users table
+      const { data: userData } = await supabase
+        .from("users")
+        .select("college_id")
+        .eq("id", userId)
+        .single();
+
+      if (!userData) return;
+      setCollegeId(userData.college_id);
+
+      // Only block if there's a currently PENDING request.
+      // Approved requests are fine — sellers can have multiple shops.
+      const { data: pendingReq } = await supabase
+        .from("seller_requests")
+        .select("status")
+        .eq("college_id", userData.college_id)
+        .eq("status", "pending")
+        .single();
+
+      if (pendingReq) setHasPending(true);
+    };
+    if (userId) checkStatus();
+  }, [userId]);
+
+  const set = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const submit = async e => {
+    e.preventDefault();
+    if (!form.shop_name.trim() || !form.shop_description.trim() || !form.category) {
+      setMsg({ type: "error", text: "Please fill in all fields." });
+      return;
+    }
+    setSaving(true); setMsg(null);
+    try {
+      const { error } = await supabase.from("seller_requests").insert([{
+        college_id:       collegeId,
+        shop_name:        form.shop_name,
+        shop_description: form.shop_description,
+        category:         form.category,
+        status:           "pending",
+      }]);
+      if (error) throw error;
+
+      // Update seller_status in users table
+      await supabase.from("users").update({ seller_status: "pending" }).eq("id", userId);
+
+      setMsg({ type: "success", text: "Application submitted! Admin will review it soon." });
+      setTimeout(() => onClose(), 1800);
+    } catch (err) {
+      setMsg({ type: "error", text: err.message || "Submission failed. Please try again." });
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.38)",
+        zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        background: "#fff", borderRadius: 16, width: "100%", maxWidth: 460,
+        maxHeight: "90vh", overflowY: "auto",
+        boxShadow: "0 16px 56px rgba(0,0,0,0.18)",
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: "20px 24px 16px", borderBottom: "1px solid #EDE8E3",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          position: "sticky", top: 0, background: "#fff", zIndex: 1,
+        }}>
+          <span style={{ fontWeight: 700, fontSize: 16, color: "#2C1810" }}>Apply for New Shop</span>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#aaa", lineHeight: 1 }}>×</button>
+        </div>
+
+        <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+
+          {/* Block only if there's a pending request */}
+          {hasPending ? (
+            <>
+              <div style={{
+                padding: "14px 16px", borderRadius: 10, fontSize: 13,
+                background: "#FFF8E1", color: "#7A5800", fontWeight: 500,
+                border: "1px solid #FFE082",
+              }}>
+                ⏳ You already have a pending application. Please wait for admin review before applying again.
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button onClick={onClose} style={{
+                  padding: "11px 18px", background: "none", border: "1.5px solid #EDE8E3",
+                  borderRadius: 9, color: "#3D2B2B", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                }}>Close</button>
+              </div>
+            </>
+          ) : (
+            <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{
+                padding: "10px 14px", borderRadius: 8, fontSize: 12.5,
+                background: "#F7F4F0", color: "#666",
+              }}>
+                📋 Your application will be reviewed by an admin before your shop goes live.
+              </div>
+
+              <Field label="Shop Name" required>
+                <input style={iStyle} name="shop_name" value={form.shop_name} onChange={set}
+                  placeholder="e.g. Neha's Stationery" onFocus={fo} onBlur={bl} required />
+              </Field>
+
+              <Field label="Description" required>
+                <textarea style={{ ...iStyle, minHeight: 70, resize: "vertical", lineHeight: 1.6 }}
+                  name="shop_description" value={form.shop_description} onChange={set}
+                  placeholder="What do you sell?" onFocus={fo} onBlur={bl} required />
+              </Field>
+
+              <Field label="Category" required>
+                <select style={iStyle} name="category" value={form.category} onChange={set} onFocus={fo} onBlur={bl} required>
+                  <option value="">Select a category…</option>
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+
+              {msg && (
+                <div style={{
+                  padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 500,
+                  background: msg.type === "success" ? "#EDFBF3" : "#FEF0EE",
+                  color:      msg.type === "success" ? "#22764A"  : "#C0392B",
+                }}>
+                  {msg.type === "success" ? "✓ " : "⚠ "}{msg.text}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 4 }}>
+                <button type="button" onClick={onClose} style={{
+                  padding: "11px 18px", background: "none", border: "1.5px solid #EDE8E3",
+                  borderRadius: 9, color: "#3D2B2B", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                }}>Cancel</button>
+                <button type="submit" disabled={saving} style={{
+                  padding: "11px 18px", background: saving ? "#bbb" : "#C0392B",
+                  color: "#fff", border: "none", borderRadius: 9,
+                  fontWeight: 700, fontSize: 14, cursor: saving ? "not-allowed" : "pointer",
+                }}>
+                  {saving ? "Submitting…" : "Submit Application"}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -714,7 +450,9 @@ export default function MyShops() {
   const [userId,        setUserId]        = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
-  const [modalShop,     setModalShop]     = useState(undefined); // undefined=closed | null=create | obj=edit
+  const [modalShop,     setModalShop]     = useState(undefined); // undefined=closed | obj=edit
+  const [applyModal,    setApplyModal]    = useState(false);
+  const [activeShop,    setActiveShop]    = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -776,7 +514,7 @@ export default function MyShops() {
           {shops.length} shop{shops.length !== 1 ? "s" : ""}
         </span>
         <button
-          onClick={() => setModalShop(null)}
+          onClick={() => setApplyModal(true)}
           style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 18px", borderRadius: 8,
@@ -784,7 +522,7 @@ export default function MyShops() {
             border: "none", fontWeight: 700, fontSize: 13.5, cursor: "pointer",
           }}
         >
-          + New Shop
+          + Apply for New Shop
         </button>
       </div>
 
@@ -796,12 +534,12 @@ export default function MyShops() {
           <div style={{ fontSize: 48, marginBottom: 14 }}>🏪</div>
           <div style={{ fontWeight: 700, fontSize: 17, color: "#2C1810", marginBottom: 8 }}>No shops yet</div>
           <div style={{ color: "#888", fontSize: 13.5, marginBottom: 20 }}>
-            Create your first shop to start listing products.
+            Apply for a shop and wait for admin approval.
           </div>
-          <button onClick={() => setModalShop(null)} style={{
+          <button onClick={() => setApplyModal(true)} style={{
             padding: "11px 26px", background: "#3D2B2B", color: "#fff",
             border: "none", borderRadius: 9, fontWeight: 700, fontSize: 14, cursor: "pointer",
-          }}>Create First Shop</button>
+          }}>Apply for New Shop</button>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
@@ -811,11 +549,15 @@ export default function MyShops() {
               shop={shop}
               productCount={productCounts[shop.id] || 0}
               onEdit={s => setModalShop(s)}
-              onViewProducts={shopId => navigate(`/seller/products?shop=${shopId}`)}
+              onViewProducts={shopId => {
+                setActiveShop(shopId);
+                navigate(`/seller/products?shop=${shopId}`);
+              }}
+              isActive={activeShop === shop.id}
             />
           ))}
           <div
-            onClick={() => setModalShop(null)}
+            onClick={() => setApplyModal(true)}
             style={{
               background: "#fff", borderRadius: 14,
               border: "2px dashed #EDE8E3", minHeight: 200,
@@ -828,17 +570,26 @@ export default function MyShops() {
             onMouseLeave={e => { e.currentTarget.style.borderColor = "#EDE8E3"; e.currentTarget.style.color = "#ccc"; }}
           >
             <span style={{ fontSize: 32, lineHeight: 1 }}>＋</span>
-            <span style={{ fontSize: 13.5, fontWeight: 600 }}>Add another shop</span>
+            <span style={{ fontSize: 13.5, fontWeight: 600 }}>Apply for New Shop</span>
           </div>
         </div>
       )}
 
+      {/* Edit modal */}
       {modalShop !== undefined && (
         <ShopModal
           shop={modalShop}
           userId={userId}
           onClose={() => setModalShop(undefined)}
           onSaved={load}
+        />
+      )}
+
+      {/* Apply modal */}
+      {applyModal && (
+        <ApplyShopModal
+          userId={userId}
+          onClose={() => setApplyModal(false)}
         />
       )}
     </div>

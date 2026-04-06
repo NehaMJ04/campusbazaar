@@ -20,7 +20,7 @@ function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  // 🔹 STEP 1: SEND OTP
+  //  STEP 1: SEND OTP
   async function handleSignup(e) {
     e.preventDefault();
     setError("");
@@ -38,7 +38,7 @@ function Signup() {
 
     setLoading(true);
 
-    // 🔹 CHECK college_users TABLE
+    //  CHECK college_users TABLE
     const { data: collegeUser, error: checkError } = await supabase
       .from("college_users")
       .select("*")
@@ -51,7 +51,7 @@ function Signup() {
       setLoading(false);
       return;
     }
-     // 🔹 CHECK IF ALREADY REGISTERED  
+     //  CHECK IF ALREADY REGISTERED  
     const { data: existingUser } = await supabase
       .from("users")
       .select("id")
@@ -64,7 +64,7 @@ function Signup() {
       return;
     }
 
-    // 🔹 SEND OTP
+    //  SEND OTP
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: formData.email,
       options: {
@@ -82,7 +82,7 @@ function Signup() {
     setStep(2);
   }
 
-  // 🔹 STEP 2: VERIFY OTP
+  //  STEP 2: VERIFY OTP
   async function handleVerifyOtp(e) {
     e.preventDefault();
     setError("");
@@ -102,7 +102,7 @@ function Signup() {
 
     const user = data.user;
 
-    // 🔹 INSERT INTO users TABLE
+    //  INSERT INTO users TABLE
     const { error: insertError } = await supabase
       .from("users")
       .insert({
@@ -122,7 +122,7 @@ function Signup() {
     navigate("/login");
   }
 
-  // 🔹 STEP 1 UI
+  //  STEP 1 UI
   if (step === 1) {
     return (
       <div className="auth-container">

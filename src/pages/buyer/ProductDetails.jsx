@@ -306,12 +306,12 @@ function ProductDetails() {
               >
                 {isOutOfStock ? "Out of Stock" : "Add to Cart"}
               </button>
-              <button
+              {/* <button
                 className="secondary-btn"
                 onClick={() => shop?.seller_id && navigate(`/buyer/chat/${shop.seller_id}`)}
               >
                 Chat with Seller
-              </button>
+              </button> */}
             </div>
 
             <div className="pd-back">

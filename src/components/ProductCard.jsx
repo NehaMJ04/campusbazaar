@@ -44,7 +44,7 @@ function ProductCard({ product }) {
           style={{ opacity: isOutOfStock ? 0.5 : 1 }}
         />
 
-        {/* ✅ Out of stock overlay on image */}
+        {/* Out of stock overlay on image */}
         {isOutOfStock && (
           <div style={{
             position: "absolute", inset: 0,
@@ -62,7 +62,7 @@ function ProductCard({ product }) {
           </div>
         )}
 
-        {/* ✅ Low stock badge — top corner */}
+        {/*  Low stock badge — top corner */}
         {isLowStock && (
           <div style={{
             position: "absolute", top: 8, left: 8,
@@ -80,7 +80,7 @@ function ProductCard({ product }) {
         <h3 className="product-name">{product.name}</h3>
         <p className="product-price">₹{product.price}</p>
 
-        {/* ✅ Disabled View Details if out of stock */}
+        {/*  Disabled View Details if out of stock */}
         {isOutOfStock ? (
           <span style={{
             display: "inline-block",

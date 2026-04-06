@@ -303,7 +303,7 @@ export const AddProduct = () => {
         category:    form.category,
         seller_id:   user?.id,
       });
-      navigate("/seller/products");
+      navigate(`/seller/products?shop=${form.shop_id}`);
     } catch (err) {
       alert("Failed to add product: " + err.message);
     } finally {

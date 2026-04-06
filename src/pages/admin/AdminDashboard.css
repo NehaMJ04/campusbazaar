@@ -7,11 +7,6 @@
   width: 100vw;
   background-color: #f2ecec;
   position: relative;
-  overflow: hidden;
-  color: black;
-  background-color: #f2ecec;
-  position: relative;
-  overflow: hidden;
   color: black;
 }
 
@@ -148,6 +143,7 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #f2ecec;
+  overflow: auto;
 }
 
 /* ═══════════════════════════════════
@@ -205,7 +201,6 @@
    MAIN CONTENT
 ═══════════════════════════════════ */
 .main-content {
-  padding: 32px;
   padding: 32px;
   flex: 1;
   background-color: #f2ecec;

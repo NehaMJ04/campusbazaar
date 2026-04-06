@@ -123,7 +123,7 @@ export default function Orders() {
 
   useEffect(() => { fetchOrders(); }, []);
 
-  async function fetchOrders() {
+  async function fetchOrders() { 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;

@@ -1,117 +1,10 @@
-// import { useEffect, useState } from "react";
-// import { getProductsBySeller, deleteProduct } from "../../services/productService";
-// import { supabase } from "../../supabaseClient";
-// import "./ProductList.css";
-
-// const ProductList = () => {
-//   const [products, setProducts] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const fetchProducts = async () => {
-//     try {
-//       let seller_id;
-
-//       const {
-//         data: { user },
-//       } = await supabase.auth.getUser();
-
-//       if (!user) {
-//         console.warn("User not logged in, using fallback seller");
-
-//         // 🔥 YOUR UUID
-//         seller_id = "fbd0dc93-a1eb-4b5b-975e-55e78fe1ff79";
-
-//       } else {
-//         seller_id = user.id;
-//       }
-
-//       console.log("Using seller_id:", seller_id);
-
-//       const data = await getProductsBySeller(seller_id);
-//       setProducts(data);
-
-//     } catch (error) {
-//       console.error("FETCH ERROR:", error);
-//       alert("Error fetching products");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchProducts();
-//   }, []);
-
-//   // 🗑 Delete product
-//   const handleDelete = async (id) => {
-//     const confirmDelete = confirm("Are you sure you want to delete this product?");
-//     if (!confirmDelete) return;
-
-//     try {
-//       await deleteProduct(id);
-//       alert("Product deleted!");
-//       fetchProducts(); // refresh
-//     } catch (error) {
-//       alert("Delete failed");
-//     }
-//   };
-
-//   if (loading) return <p>Loading products...</p>;
-
-//   return (
-//   <div className="seller-container">
-//     <h2 className="seller-title">My Products</h2>
-
-//     {products.length === 0 ? (
-//       <p>No products found</p>
-//     ) : (
-//       <div className="product-grid">
-//         {products.map((product) => (
-//           <div key={product.id} className="product-card">
-            
-//             <img
-//               src={product.image_urls || "https://via.placeholder.com/300"}
-//               alt={product.name}
-//               className="product-image"
-//             />
-
-//             <div className="product-name">{product.name}</div>
-//             <div className="product-desc">{product.description}</div>
-//             <div className="product-price">₹{product.price}</div>
-//             <div className="product-stock">Stock: {product.stock}</div>
-
-//             <div className="btn-group">
-//               <button
-//                 className="danger-btn"
-//                 onClick={() => handleDelete(product.id)}
-//               >
-//                 Delete
-//               </button>
-
-//               <button
-//                 className="primary-btn"
-//                 onClick={() =>
-//                   (window.location.href = `/seller/edit-product/${product.id}`)
-//                 }
-//               >
-//                 Edit
-//               </button>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     )}
-//   </div>
-// );
-// }
-
-// export default ProductList;
-
-
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { getProductsBySeller, deleteProduct } from "../../services/productService";
 import { supabase } from "../../supabaseClient";
+
+import { useSearchParams, useNavigate } from "react-router-dom";
+
 
 const StockBadge = ({ stock }) => {
   if (stock === 0) return <span style={{ background: "#FEF0EE", color: "#C0392B", fontSize: "11px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px" }}>Out of stock</span>;
@@ -126,12 +19,17 @@ export default function ProductList() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [deleting, setDeleting] = useState(null);
+  const [searchParams] = useSearchParams();
+  const shopId = searchParams.get("shop");
+
+  const [shops, setShops] = useState([]);
+  const [currentShop, setCurrentShop] = useState(null);
 
   const fetchProducts = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       const seller_id = user?.id || "fbd0dc93-a1eb-4b5b-975e-55e78fe1ff79";
-      const data = await getProductsBySeller(seller_id);
+      const data = await getProductsBySeller(seller_id, shopId);
       setProducts(data || []);
     } catch (err) {
       console.error(err);
@@ -140,7 +38,29 @@ export default function ProductList() {
     }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => {fetchProducts();}, [shopId]);
+
+  async function fetchShops() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("shops")
+      .select("id, name")
+      .eq("seller_id", user.id)
+      .order("name");
+
+    setShops(data || []);
+  }
+
+  useEffect(() => {fetchShops();}, []);
+
+  useEffect(() => {
+    if (!shopId || shops.length === 0) return;
+
+    const shop = shops.find(s => s.id === shopId);
+    setCurrentShop(shop);
+  }, [shopId, shops]);
 
   async function handleDelete(id, name) {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
@@ -219,6 +139,46 @@ export default function ProductList() {
           </svg>
           Add Product
         </button>
+      </div>
+
+      {/* Shop Header + Dropdown */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "16px"
+      }}>
+        
+        {/* Current Shop Name */}
+        <div style={{ fontWeight: 700, fontSize: "16px" }}>
+          {shopId ? `${currentShop?.name || "Shop"} Products` : "All Products"}
+        </div>
+
+        {/* Shop Switch Dropdown */}
+        <select
+          value={shopId || ""}
+          onChange={(e) => {
+            const selected = e.target.value;
+            if (selected) {
+              navigate(`/seller/products?shop=${selected}`);
+            } else {
+              navigate(`/seller/products`);
+            }
+          }}
+          style={{
+            padding: "8px 12px",
+            borderRadius: "8px",
+            border: "1px solid #EDE8E3",
+            fontSize: "13px"
+          }}
+        >
+          <option value="">All Shops</option>
+          {shops.map(shop => (
+            <option key={shop.id} value={shop.id}>
+              {shop.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Count */}

@@ -16,12 +16,18 @@ export const addProduct = async (product) => {
 };
 
 // ✅ Get Products by Seller
-export const getProductsBySeller = async (seller_id) => {
-  const { data, error } = await supabase
+export const getProductsBySeller = async (seller_id, shop_id = null) => {
+  let query = supabase
     .from("products")
     .select("*")
     .eq("seller_id", seller_id)
     .order("created_at", { ascending: false });
+
+  if (shop_id) {
+    query = query.eq("shop_id", shop_id);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Error fetching products:", error);
